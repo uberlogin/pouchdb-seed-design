@@ -1,6 +1,10 @@
 # pouchdb-seed-design
 Seed CouchDB design documents with [`PouchDB`](http://pouchdb.com).
 
+##Build status
+
+[![Build Status](https://travis-ci.org/colinskow/pouchdb-seed-design.png?branch=master)](https://travis-ci.org/colinskow/pouchdb-seed-design)
+
 ## Installation
 
 ```sh
