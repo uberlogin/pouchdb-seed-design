@@ -1,8 +1,8 @@
-var nano = require('nano');
-var seed = require('../');
-var db = nano('http://localhost:5984/design');
+var PouchDB = require('pouchdb');
+var seed = require('../index');
+var db = new PouchDB('http://localhost:5984/pouch_simple_test');
 
-seed(db, {
+var designDoc = {
   person: {
     views: {
       byFirstName: function (doc) {
@@ -22,6 +22,12 @@ seed(db, {
       }
     }
   }
-}, function () {
-  console.dir(arguments);
-});
+};
+
+seed(db, designDoc)
+  .then(function(result) {
+    console.log(result);
+  })
+  .catch(function(err) {
+    console.log(err)
+  });

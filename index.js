@@ -1,3 +1,4 @@
+var Promise = require('bluebird');
 var objmap = require('object-map');
 var objfilter = require('object-filter');
 var objkeysmap = require('object-keys-map');
@@ -72,37 +73,40 @@ module.exports = function (db, design, cb) {
 
   var local = objmap(objkeysmap(design, addDesign), normalizeDoc);
 
-  db.fetch({ keys: Object.keys(local) }, function (err, docs) {
-    var diff;
-    var remote = {};
-    var update;
+  var seedPromise = db.allDocs({ include_docs: true, keys: Object.keys(local) })
 
-    if (err) {
-      return cb && cb(err);
-    }
+    .then(function (docs) {
 
-    docs.rows.forEach(function (doc) {
-      if (doc.doc) {
-        remote[doc.key] = normalizeDoc(doc.doc);
+      var diff;
+      var remote = {};
+      var update;
+
+      docs.rows.forEach(function (doc) {
+        if (doc.doc) {
+          remote[doc.key] = normalizeDoc(doc.doc);
+        }
+      });
+
+      update = objmaptoarr(objfilter(local, function (value, key) {
+        return !docEqual(value, remote[key]);
+      }), function (v, k) {
+        if (remote[k]) {
+          v._rev = remote[k]._rev;
+        }
+
+        return v;
+      });
+
+      if (update.length > 0) {
+        return db.bulkDocs({ docs: update });
+      } else {
+        return Promise.resolve(false);
       }
     });
 
-    update = objmaptoarr(objfilter(local, function (value, key) {
-      return !docEqual(value, remote[key]);
-    }), function (v, k) {
-      if (remote[k]) {
-        v._rev = remote[k]._rev;
-      }
+  if(typeof cb === 'function') {
+    seedPromise.nodeify(cb);
+  }
+  return seedPromise;
 
-      return v;
-    });
-
-    if (update.length === 0) {
-      return cb && cb(null, false);
-    }
-
-    db.bulk({ docs: update }, function (err) {
-      cb && cb(err, true);
-    });
-  });
 };

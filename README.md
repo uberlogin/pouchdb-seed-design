@@ -1,18 +1,18 @@
-# couchdb-seed-design
-Seed CouchDB design documents with [`nano`](https://github.com/dscape/nano).
+# pouchdb-seed-design
+Seed CouchDB design documents with [`PouchDB`](http://pouchdb.com).
 
 ## Installation
 
 ```sh
-npm install couchdb-seed-design
+npm install pouchdb-seed-design
 ```
 
 ## Usage
 
 ```js
-var nano = require('nano');
-var seed = require('couchdb-seed-design');
-var db = nano('http://localhost:5984/design');
+var PouchDB = require('pouchdb');
+var seed = require('pouchdb-seed-design');
+var db = new PouchDB('http://localhost:5984/design');
 
 seed(db, {
   person: {
@@ -35,14 +35,31 @@ seed(db, {
 
 ## API
 
-### `couchdb-seed-design(db, design, cb)`
+### `pouchdb-seed-design(db, design, cb)`
 
-* `db` (`object`, required) - `nano` (or compatible) database object
+* `db` (`object`, required) - `PouchDB` (or compatible) database object
 * `design` (`object`, required) - design object
 * `cb` (`function`, optional) - callback
 
-Creates a set of CouchDB design documents basing on `design` object. Each key
-in `design` object becomes a separate design document called (`'_design/' + key`).
+Creates a set of CouchDB design documents basing on `design` object. Each key in `design` object becomes a separate design document called (`'_design/' + key`).
 
-If no changes between remote design documents and `design` object are detected,
-no updates are sent to CouchDB.
+If no changes between remote design documents and `design` object are detected, no updates are sent to CouchDB.
+
+In addition to invoking the optional callback, seed also returns a [Bluebird Promise](https://github.com/petkaantonov/bluebird/blob/master/API.md).
+
+```js
+seed(db, design)
+  .then(function(results) {
+    console.log(results);
+  }, function(err){
+    console.log(err);
+  });
+```
+
+## Credits
+
+This project is forked from [couchdb-seed-design](https://github.com/mmalecki/couchdb-seed-design) by Maciej Małecki.
+
+A huge round of applause goes to [Dale Harvey](https://github.com/daleharvey), [Calvin Metcalf](https://github.com/calvinmetcalf), and [Nolan Lawson](https://github.com/nolanlawson) for all the tireless work they put into maintaining PouchDB!
+
+And a special thanks goes to [Mirco Zeiss](http://www.mircozeiss.com) for all the awesome blog articles on how to use Node.js, Express, and CouchDB!

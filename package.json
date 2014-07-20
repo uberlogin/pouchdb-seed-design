@@ -1,17 +1,32 @@
 {
-  "name": "couchdb-seed-design",
-  "version": "0.0.5",
-  "author": "Maciej Małecki <me@mmalecki.com>",
-  "keywords": ["couchdb", "design document", "nano", "view"],
-  "description": "Seed CouchDB's design documents with nano",
+  "name": "pouchdb-seed-design",
+  "version": "0.0.6",
+  "author": "Colin Skow",
+  "keywords": [
+    "couchdb",
+    "design document",
+    "PouchDB",
+    "view"
+  ],
+  "description": "Seed CouchDB's design documents with PouchDB",
   "devDependencies": {
-    "nano": "~4.2.1"
+    "chai": "^1.9.1",
+    "gulp": "^3.8.6",
+    "gulp-jshint": "^1.7.1",
+    "gulp-mocha": "^0.5.1",
+    "jshint-stylish": "^0.4.0",
+    "mocha": "^1.20.1",
+    "pouchdb": "^2.2.3"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mmalecki/couchdb-seed-design.git"
+    "url": "https://github.com/colinskow/pouchdb-seed-design.git"
+  },
+  "scripts": {
+    "test": "gulp test"
   },
   "dependencies": {
+    "bluebird": "^2.2.2",
     "object-filter": "~1.0.1",
     "object-keys-map": "~1.0.1",
     "object-map": "0.0.0",
