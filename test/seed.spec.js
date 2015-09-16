@@ -21,11 +21,27 @@ var designDoc = {
         doc.firstName = req.body;
         return [doc, "ok"];
       }
+    },
+    filters: {
+      byType: function(doc, req) {
+        return doc.type == "person";
+      }
+    },
+    lists: {
+      zoom: function() { return "zoom!"; },
+    },
+    shows: {
+      people: function(doc, req) { return "foo"; }
+    },
+    validate_doc_update: function(newDoc, oldDoc, userCtx, secObj) {
+      if (newDoc.address === undefined) {
+        throw({forbidden: 'Document must have an address.'});
+      }
     }
   }
 };
 
-describe("pouchdb_seed_design", function(){
+describe("pouchdb_seed_design", function() {
 
   var previous, step1, step2, step3;
 
@@ -33,8 +49,15 @@ describe("pouchdb_seed_design", function(){
     previous = seed(db, designDoc)
       .then(function(result) {
         expect(result[0].id).to.equal("_design/person");
-        step1 = true;
-        done();
+
+        db.get(result[0].id).then(function(ddoc) {
+            expect(ddoc.filters.byType).to.not.equal(null);
+            expect(ddoc.lists.zoom).to.not.equal(null);
+            expect(ddoc.shows.people).to.not.equal(null);
+            expect(ddoc.validate_doc_update).to.not.equal(null);
+            step1 = true;
+            done();
+          });
       });
   });
 
@@ -78,6 +101,4 @@ describe("pouchdb_seed_design", function(){
       })
       .done();
   });
-
-
 });

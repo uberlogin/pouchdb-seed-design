@@ -14,15 +14,19 @@ function normalizeDoc(doc, id) {
     _id: id || doc._id,
     _rev: doc._rev,
     views: (doc.views && objmap(doc.views, normalizeView)) || {},
-    updates: (doc.updates && objmap(doc.updates, normalizeUpdate)) || {}
+    updates: (doc.updates && objmap(doc.updates, stringify)) || {},
+    filters: (doc.filters && objmap(doc.filters, stringify)) || {},
+    lists: (doc.lists && objmap(doc.lists, stringify)) || {},
+    shows: (doc.shows && objmap(doc.filters, stringify)) || {},
+    validate_doc_update: (doc.validate_doc_update && stringify(doc.validate_doc_update)) || null,
   };
 }
 
-function normalizeUpdate(update) {
-  return update.toString();
+function stringify(obj) {
+  return obj.toString();
 }
 
-function updatesEqual(a, b) {
+function objEqual(a, b) {
   return !objsome(a, function (v, k) {
     return v !== b[k];
   });
@@ -63,7 +67,11 @@ function docEqual(local, remote) {
   }
 
   return viewsEqual(local.views, remote.views) &&
-         updatesEqual(local.updates, remote.updates);
+         objEqual(local.updates, remote.updates) &&
+         objEqual(local.filters, remote.filters) &&
+         objEqual(local.lists, remote.lists) &&
+         objEqual(local.shows, remote.shows) &&
+         local.validate_doc_update === remote.validate_doc_update;
 }
 
 module.exports = function (db, design, cb) {
