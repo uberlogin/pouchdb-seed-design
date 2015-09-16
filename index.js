@@ -1,9 +1,12 @@
-var Promise = require('bluebird');
 var objmap = require('object-map');
 var objfilter = require('object-filter');
 var objkeysmap = require('object-keys-map');
 var objmaptoarr = require('object-map-to-array');
 var objsome = require('object-some');
+
+if(typeof Promise !== 'function') {
+  var Promise = require('lie');
+}
 
 function addDesign(s) {
   return '_design/' + s;
@@ -17,8 +20,8 @@ function normalizeDoc(doc, id) {
     updates: (doc.updates && objmap(doc.updates, stringify)) || {},
     filters: (doc.filters && objmap(doc.filters, stringify)) || {},
     lists: (doc.lists && objmap(doc.lists, stringify)) || {},
-    shows: (doc.shows && objmap(doc.filters, stringify)) || {},
-    validate_doc_update: (doc.validate_doc_update && stringify(doc.validate_doc_update)) || null,
+    shows: (doc.shows && objmap(doc.shows, stringify)) || {},
+    validate_doc_update: (doc.validate_doc_update && stringify(doc.validate_doc_update)) || null
   };
 }
 
@@ -110,11 +113,20 @@ module.exports = function (db, design, cb) {
       } else {
         return Promise.resolve(false);
       }
+    })
+    .then(function(result) {
+      if(typeof cb === 'function') {
+        cb(null, result);
+      }
+      return Promise.resolve(result);
+    })
+    .catch(function(err) {
+      if(typeof cb === 'function') {
+        cb(err, null);
+      }
+      return Promise.reject(err);
     });
 
-  if(typeof cb === 'function') {
-    seedPromise.nodeify(cb);
-  }
   return seedPromise;
 
 };

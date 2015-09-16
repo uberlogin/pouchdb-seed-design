@@ -1,7 +1,11 @@
 var PouchDB = require("pouchdb");
 var expect = require("chai").expect;
 var seed = require("../index");
-var db = new PouchDB("http://localhost:5984/pouch_simple_test");
+var db = new PouchDB("http://localhost:5984/pouchdb_seed_test");
+
+if(typeof Promise !== 'function') {
+  var Promise = require('lie');
+}
 
 var designDoc = {
   person: {
@@ -49,27 +53,35 @@ describe("pouchdb_seed_design", function() {
     previous = seed(db, designDoc)
       .then(function(result) {
         expect(result[0].id).to.equal("_design/person");
-
-        db.get(result[0].id).then(function(ddoc) {
-            expect(ddoc.filters.byType).to.not.equal(null);
-            expect(ddoc.lists.zoom).to.not.equal(null);
-            expect(ddoc.shows.people).to.not.equal(null);
-            expect(ddoc.validate_doc_update).to.not.equal(null);
-            step1 = true;
-            done();
-          });
+        return db.get(result[0].id);
+      })
+      .then(function(ddoc) {
+        expect(ddoc.filters.byType).to.be.a('string');
+        expect(ddoc.lists.zoom).to.be.a('string');
+        expect(ddoc.shows.people).to.be.a('string');
+        expect(ddoc.validate_doc_update).to.be.a('string');
+        done();
+      })
+      .catch(function(err) {
+        done(err);
       });
   });
 
   it("should not try to write over a design document that hasn't changed (with callback)", function(done) {
     previous
       .then(function() {
-        return seed(db, designDoc, function(err, result) {
-          expect(err).to.equal(null);
-          expect(result).to.equal(false);
-          step2 = true;
-          done();
+        return new Promise(function(resolve, reject) {
+          seed(db, designDoc, function(err, result) {
+            if(err) reject(err);
+            expect(err).to.equal(null);
+            expect(result).to.equal(false);
+            done();
+            resolve();
+          });
         });
+      })
+      .catch(function(err) {
+        done(err);
       });
   });
 
@@ -83,8 +95,10 @@ describe("pouchdb_seed_design", function() {
       })
       .then(function(result) {
         expect(result[0].id).to.equal("_design/person");
-        step3 = true;
         done();
+      })
+      .catch(function(err) {
+        done(err);
       });
   });
 
@@ -94,11 +108,10 @@ describe("pouchdb_seed_design", function() {
         return db.destroy();
       })
       .then(function() {
-        expect(step1).to.equal(true);
-        expect(step2).to.equal(true);
-        expect(step3).to.equal(true);
         done();
       })
-      .done();
+      .catch(function(err) {
+        done(err);
+      });
   });
 });

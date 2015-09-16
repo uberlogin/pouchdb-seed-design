@@ -60,6 +60,11 @@ seed(db, design)
   });
 ```
 
+## Updates
+
+##### (0.2.0) 2015-09-16 
+Added support for `filters`, `lists`, `shows`, and `validate_doc_update` thanks to [Will Holley](https://github.com/colinskow/pouchdb-seed-design/pull/2). Updated to PouchDB `4.0.X`. Removed Bluebird Promise dependency, preferring native and using [lie](https://github.com/calvinmetcalf/lie) as a fallback.
+
 ## Credits
 
 This project is forked from [couchdb-seed-design](https://github.com/mmalecki/couchdb-seed-design) by Maciej Małecki.
