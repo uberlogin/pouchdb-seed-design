@@ -13,16 +13,17 @@ function addDesign(s) {
 }
 
 function normalizeDoc(doc, id) {
-  return {
+  var normalized = {
     _id: id || doc._id,
-    _rev: doc._rev,
-    views: (doc.views && objmap(doc.views, normalizeView)) || {},
-    updates: (doc.updates && objmap(doc.updates, stringify)) || {},
-    filters: (doc.filters && objmap(doc.filters, stringify)) || {},
-    lists: (doc.lists && objmap(doc.lists, stringify)) || {},
-    shows: (doc.shows && objmap(doc.shows, stringify)) || {},
-    validate_doc_update: (doc.validate_doc_update && stringify(doc.validate_doc_update)) || null
+    _rev: doc._rev
   };
+  if(doc.views) normalized.views = objmap(doc.views, normalizeView);
+  if(doc.updates) normalized.updates = objmap(doc.updates, stringify);
+  if(doc.filters) normalized.filters = objmap(doc.filters, stringify);
+  if(doc.lists) normalized.lists = objmap(doc.lists, stringify);
+  if(doc.shows) normalized.shows = objmap(doc.shows, stringify);
+  if(doc.validate_doc_update) normalized.validate_doc_update = stringify(doc.validate_doc_update);
+  return normalized;
 }
 
 function stringify(obj) {

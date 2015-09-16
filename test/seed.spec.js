@@ -7,7 +7,7 @@ if(typeof Promise !== 'function') {
   var Promise = require('lie');
 }
 
-var designDoc = {
+var designDoc1 = {
   person: {
     views: {
       byFirstName: function (doc) {
@@ -45,12 +45,36 @@ var designDoc = {
   }
 };
 
+var designDoc2 = {
+  person: {
+    views: {
+      byMiddleName: function (doc) {
+        emit(doc.middleName);
+      },
+      byLastName: function (doc) {
+        emit(doc.lastName);
+      }
+    },
+    updates: {
+      firstName: function (doc, req) {
+        doc.firstName = req.body;
+        return [doc, "ok"];
+      }
+    },
+    filters: {
+      byType: function(doc, req) {
+        return doc.type == "person";
+      }
+    }
+  }
+};
+
 describe("pouchdb_seed_design", function() {
 
   var previous, step1, step2, step3;
 
   it("should add design docs to an empty database (returning a promise)", function(done) {
-    previous = seed(db, designDoc)
+    previous = seed(db, designDoc1)
       .then(function(result) {
         expect(result[0].id).to.equal("_design/person");
         return db.get(result[0].id);
@@ -71,7 +95,7 @@ describe("pouchdb_seed_design", function() {
     previous
       .then(function() {
         return new Promise(function(resolve, reject) {
-          seed(db, designDoc, function(err, result) {
+          seed(db, designDoc1, function(err, result) {
             if(err) reject(err);
             expect(err).to.equal(null);
             expect(result).to.equal(false);
@@ -88,13 +112,30 @@ describe("pouchdb_seed_design", function() {
   it("should write over a design document that has changed", function(done) {
     previous
       .then(function() {
-        designDoc.person.views.byLastName = function(doc) {
+        designDoc1.person.views.byLastName = function(doc) {
           emit("Mr. " + doc.lastName);
         };
-        return seed(db, designDoc);
+        return seed(db, designDoc1);
       })
       .then(function(result) {
         expect(result[0].id).to.equal("_design/person");
+        done();
+      })
+      .catch(function(err) {
+        done(err);
+      });
+  });
+
+  it("should correctly remove views on update if they no longer exist", function(done) {
+    previous
+      .then(function() {
+        return seed(db, designDoc2);
+      })
+      .then(function(result) {
+        return db.get(result[0].id);
+      })
+      .then(function(ddoc) {
+        expect(ddoc.validate_doc_update).to.be.an('undefined');
         done();
       })
       .catch(function(err) {
