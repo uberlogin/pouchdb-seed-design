@@ -47,14 +47,6 @@ var designDoc1 = {
 
 var designDoc2 = {
   person: {
-    views: {
-      byMiddleName: function (doc) {
-        emit(doc.middleName);
-      },
-      byLastName: function (doc) {
-        emit(doc.lastName);
-      }
-    },
     updates: {
       firstName: function (doc, req) {
         doc.firstName = req.body;
@@ -136,6 +128,20 @@ describe("pouchdb_seed_design", function() {
       })
       .then(function(ddoc) {
         expect(ddoc.validate_doc_update).to.be.an('undefined');
+        done();
+      })
+      .catch(function(err) {
+        done(err);
+      });
+  });
+
+  it("should not update a doc that hasn't changed (without all fields specified)", function(done) {
+    previous
+      .then(function() {
+        return seed(db, designDoc2);
+      })
+      .then(function(result) {
+        expect(result).to.equal(false);
         done();
       })
       .catch(function(err) {

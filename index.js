@@ -30,36 +30,55 @@ function stringify(obj) {
   return obj.toString();
 }
 
+function normalizeView(view) {
+  var r = {};
+  if (typeof view === 'function' || typeof view === 'string') {
+    return { map: view.toString() };
+  }
+  // Make sure that functions are stringified.
+  if (view.map) {
+    r.map = view.map.toString();
+  }
+  if (view.reduce) {
+    r.reduce = view.reduce.toString();
+  }
+  return r;
+}
+
 function objEqual(a, b) {
+  // If neither are specified, they are equal
+  if(!a && !b) {
+    return true;
+  }
+  // if either a or b exist, but one of them is undefined they are not equal
+  if((a || b) && (!a || !b)) {
+    return false;
+  }
+  // Crawl
   return !objsome(a, function (v, k) {
     return v !== b[k];
   });
 }
 
-function normalizeView(view) {
-  var r = {};
-
-  if (typeof view === 'function' || typeof view === 'string') {
-    return { map: view.toString() };
-  }
-
-  // Make sure that functions are stringified.
-  if (view.map) {
-    r.map = view.map.toString();
-  }
-
-  if (view.reduce) {
-    r.reduce = view.reduce.toString();
-  }
-
-  return r;
-}
-
 function viewEqual(a, b) {
+  if(!a && !b) {
+    return true;
+  }
+  if((a || b) && (!a || !b)) {
+    return false;
+  }
   return b && a.map === b.map && a.reduce === b.reduce;
 }
 
 function viewsEqual(a, b) {
+  // If neither are specified, they are equal
+  if(!a && !b) {
+    return true;
+  }
+  // if either a or b exist, but one of them is undefined they are not equal
+  if((a || b) && (!a || !b)) {
+    return false;
+  }
   return !objsome(a, function (v, k) {
     return !viewEqual(v, b[k]);
   });
