@@ -1,100 +1,37 @@
 var objmap = require('object-map');
-var objfilter = require('object-filter');
 var objkeysmap = require('object-keys-map');
-var objmaptoarr = require('object-map-to-array');
-var objsome = require('object-some');
+var deepEqual = require('deep-equal');
 
-if(typeof Promise !== 'function') {
-  var Promise = require('lie');
-}
+var extend = typeof Object.assign === 'function' ? Object.assign : require('node-extend');
 
 function addDesign(s) {
   return '_design/' + s;
 }
 
 function normalizeDoc(doc, id) {
-  var normalized = {
-    _id: id || doc._id,
-    _rev: doc._rev
-  };
-  if(doc.views) normalized.views = objmap(doc.views, normalizeView);
-  if(doc.updates) normalized.updates = objmap(doc.updates, stringify);
-  if(doc.filters) normalized.filters = objmap(doc.filters, stringify);
-  if(doc.lists) normalized.lists = objmap(doc.lists, stringify);
-  if(doc.shows) normalized.shows = objmap(doc.shows, stringify);
-  if(doc.validate_doc_update) normalized.validate_doc_update = stringify(doc.validate_doc_update);
-  return normalized;
-}
 
-function stringify(obj) {
-  return obj.toString();
-}
+  function normalize(doc) {
+    doc = extend({}, doc);
+    Object.keys(doc).forEach(function(prop) {
+      var type = typeof doc[prop];
+      if(type === 'object') {
+        doc[prop] = normalize(doc[prop]);
+      } else if(type === 'function') {
+        doc[prop] = doc[prop].toString();
+      }
+    });
+    return doc;
+  }
 
-function normalizeView(view) {
-  var r = {};
-  if (typeof view === 'function' || typeof view === 'string') {
-    return { map: view.toString() };
-  }
-  // Make sure that functions are stringified.
-  if (view.map) {
-    r.map = view.map.toString();
-  }
-  if (view.reduce) {
-    r.reduce = view.reduce.toString();
-  }
-  return r;
-}
-
-function objEqual(a, b) {
-  // If neither are specified, they are equal
-  if(!a && !b) {
-    return true;
-  }
-  // if either a or b exist, but one of them is undefined they are not equal
-  if((a || b) && (!a || !b)) {
-    return false;
-  }
-  // Crawl
-  return !objsome(a, function (v, k) {
-    return v !== b[k];
-  });
-}
-
-function viewEqual(a, b) {
-  if(!a && !b) {
-    return true;
-  }
-  if((a || b) && (!a || !b)) {
-    return false;
-  }
-  return b && a.map === b.map && a.reduce === b.reduce;
-}
-
-function viewsEqual(a, b) {
-  // If neither are specified, they are equal
-  if(!a && !b) {
-    return true;
-  }
-  // if either a or b exist, but one of them is undefined they are not equal
-  if((a || b) && (!a || !b)) {
-    return false;
-  }
-  return !objsome(a, function (v, k) {
-    return !viewEqual(v, b[k]);
-  });
+  var output = normalize(doc);
+  output._id = id || doc._id;
+  output._rev = doc._rev;
+  return output;
 }
 
 function docEqual(local, remote) {
-  if (!remote) {
-    return false;
-  }
-
-  return viewsEqual(local.views, remote.views) &&
-         objEqual(local.updates, remote.updates) &&
-         objEqual(local.filters, remote.filters) &&
-         objEqual(local.lists, remote.lists) &&
-         objEqual(local.shows, remote.shows) &&
-         local.validate_doc_update === remote.validate_doc_update;
+  if(!remote) return false;
+  return deepEqual(local, remote, {strict: true});
 }
 
 module.exports = function (db, design, cb) {
@@ -108,24 +45,20 @@ module.exports = function (db, design, cb) {
 
     .then(function (docs) {
 
-      var diff;
       var remote = {};
-      var update;
 
       docs.rows.forEach(function (doc) {
         if (doc.doc) {
-          remote[doc.key] = normalizeDoc(doc.doc);
+          remote[doc.key] = doc.doc;
         }
       });
 
-      update = objmaptoarr(objfilter(local, function (value, key) {
-        return !docEqual(value, remote[key]);
-      }), function (v, k) {
-        if (remote[k]) {
-          v._rev = remote[k]._rev;
-        }
-
-        return v;
+      var update = Object.keys(local).filter(function(key) {
+        if(!remote[key]) return true;
+        local[key]._rev = remote[key]._rev;
+        return !docEqual(local[key], remote[key]);
+      }).map(function(key) {
+        return local[key];
       });
 
       if (update.length > 0) {
@@ -144,6 +77,7 @@ module.exports = function (db, design, cb) {
       if(typeof cb === 'function') {
         cb(err, null);
       }
+      console.log(err);
       return Promise.reject(err);
     });
 

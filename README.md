@@ -18,22 +18,28 @@ var PouchDB = require('pouchdb');
 var seed = require('pouchdb-seed-design');
 var db = new PouchDB('http://localhost:5984/design');
 
-seed(db, {
-  person: {
-    views: {
-      byFirstName: function (doc) {
-        emit(doc.firstName);
-      },
-      byLastName: function (doc) {
-        emit(doc.lastName);
-      },
-      byFullName: function (doc) {
-        emit(doc.firstName + ' ' + doc.lastName);
-      }
-    }
+var ddoc = {
+ person: {
+   views: {
+     byFirstName: function (doc) {
+       emit(doc.firstName);
+     },
+     byLastName: function (doc) {
+       emit(doc.lastName);
+     },
+     byFullName: function (doc) {
+       emit(doc.firstName + ' ' + doc.lastName);
+     }
+   }
+ }
+};
+
+var promise = seed(db, ddoc).then(function(updated) {
+  if(updated) {
+    console.log('DDocs updated!');
+  } else {
+    console.log('No update was necessary');
   }
-}, function () {
-  console.dir(arguments);
 });
 ```
 
@@ -49,21 +55,15 @@ Creates a set of CouchDB design documents basing on `design` object. Each key in
 
 If no changes between remote design documents and `design` object are detected, no updates are sent to CouchDB.
 
-In addition to invoking the optional callback, seed also returns a [Bluebird Promise](https://github.com/petkaantonov/bluebird/blob/master/API.md).
-
-```js
-seed(db, design)
-  .then(function(results) {
-    console.log(results);
-  }, function(err){
-    console.log(err);
-  });
-```
+Seed will return a Promise that fulfills with `false` if no updates were necessary, or the result of the `bulkDocs` operation if changes were pushed. (You will need a `Promise` shim if you are using an older browser or version of Node.)
 
 ## Updates
 
+##### (0.3.0) 2016-05-08
+You can now use docs with absolutely any JSON schema. All functions in the tree are converted to strings. This will future proof `pouchdb-seed-design` as the design doc standards evolve. Added browser support.
+
 ##### (0.2.0) 2015-09-16 
-Added support for `filters`, `lists`, `shows`, and `validate_doc_update` thanks to [Will Holley](https://github.com/colinskow/pouchdb-seed-design/pull/2). Updated to PouchDB `4.0.X`. Removed Bluebird Promise dependency, preferring native and using [lie](https://github.com/calvinmetcalf/lie) as a fallback.
+Added support for `filters`, `lists`, `shows`, and `validate_doc_update` thanks to [Will Holley](https://github.com/colinskow/pouchdb-seed-design/pull/2).
 
 ## Credits
 
