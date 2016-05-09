@@ -15,7 +15,7 @@ npm install pouchdb-seed-design
 
 ```js
 var PouchDB = require('pouchdb');
-var seed = require('pouchdb-seed-design');
+var pouchSeed = require('pouchdb-seed-design');
 var db = new PouchDB('http://localhost:5984/design');
 
 var ddoc = {
@@ -34,7 +34,7 @@ var ddoc = {
  }
 };
 
-var promise = seed(db, ddoc).then(function(updated) {
+var promise = pouchSeed(db, ddoc).then(function(updated) {
   if(updated) {
     console.log('DDocs updated!');
   } else {
@@ -45,7 +45,7 @@ var promise = seed(db, ddoc).then(function(updated) {
 
 ## API
 
-### `pouchdb-seed-design(db, design, cb)`
+### `pouchSeed(db, design, cb)`
 
 * `db` (`object`, required) - `PouchDB` (or compatible) database object
 * `design` (`object`, required) - design object
@@ -56,6 +56,8 @@ Creates a set of CouchDB design documents basing on `design` object. Each key in
 If no changes between remote design documents and `design` object are detected, no updates are sent to CouchDB.
 
 Seed will return a Promise that fulfills with `false` if no updates were necessary, or the result of the `bulkDocs` operation if changes were pushed. (You will need a `Promise` shim if you are using an older browser or version of Node.)
+
+The browser version will export `window.pouchSeed`.
 
 ## Updates
 

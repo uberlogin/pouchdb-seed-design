@@ -1,5 +1,5 @@
 var PouchDB = require('pouchdb');
-var seed = require('../index');
+var pouchSeed = require('../index');
 var db = new PouchDB('http://localhost:5984/pouch_simple_test');
 
 var designDoc = {
@@ -24,7 +24,7 @@ var designDoc = {
   }
 };
 
-seed(db, designDoc)
+pouchSeed(db, designDoc)
   .then(function(result) {
     console.log(result);
   })

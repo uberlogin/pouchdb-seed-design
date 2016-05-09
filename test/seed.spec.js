@@ -1,6 +1,10 @@
-var PouchDB = require("pouchdb");
-var expect = require("chai").expect;
-var seed = require("../index");
+if(typeof window === 'undefined') {
+  var PouchDB = require("pouchdb");
+  var chai = require("chai");
+  var pouchSeed = require("../index");
+}
+var expect = chai.expect;
+
 var db = new PouchDB("http://localhost:5984/pouchdb_seed_test");
 
 var designDoc1 = {
@@ -67,7 +71,7 @@ describe("pouchdb_seed_design", function() {
 
   it("should add design docs to an empty database (returning a promise)", function() {
     return previous.then(function() {
-      return seed(db, designDoc1);
+      return pouchSeed(db, designDoc1);
     })
       .then(function(result) {
         expect(result[0].id).to.equal("_design/person");
@@ -85,7 +89,7 @@ describe("pouchdb_seed_design", function() {
     return previous
       .then(function() {
         return new Promise(function(resolve, reject) {
-          seed(db, designDoc1, function(err, result) {
+          pouchSeed(db, designDoc1, function(err, result) {
             if(err) reject(err);
             expect(err).to.equal(null);
             expect(result).to.equal(false);
@@ -101,7 +105,7 @@ describe("pouchdb_seed_design", function() {
         designDoc1.person.views.byLastName = function(doc) {
           emit("Mr. " + doc.lastName);
         };
-        return seed(db, designDoc1);
+        return pouchSeed(db, designDoc1);
       })
       .then(function(result) {
         expect(result[0].id).to.equal("_design/person");
@@ -111,7 +115,7 @@ describe("pouchdb_seed_design", function() {
   it("should correctly remove views on update if they no longer exist", function() {
     return previous
       .then(function() {
-        return seed(db, designDoc2);
+        return pouchSeed(db, designDoc2);
       })
       .then(function(result) {
         return db.get(result[0].id);
@@ -124,7 +128,7 @@ describe("pouchdb_seed_design", function() {
   it("should not update a doc that hasn't changed (without all fields specified)", function() {
     return previous
       .then(function() {
-        return seed(db, designDoc2);
+        return pouchSeed(db, designDoc2);
       })
       .then(function(result) {
         expect(result).to.equal(false);

@@ -1,6 +1,6 @@
 {
   "name": "pouchdb-seed-design",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "author": "Colin Skow",
   "keywords": [
     "couchdb",
@@ -10,28 +10,38 @@
     "views"
   ],
   "description": "Seed CouchDB's design documents with PouchDB",
+  "dependencies": {
+    "deep-equal": "^1.0.1",
+    "node-extend": "^0.2.0",
+    "object-keys-map": "~1.0.1",
+    "object-map": "0.0.0"
+  },
   "devDependencies": {
+    "browserify": "^13.0.1",
     "chai": "^3.5.0",
     "gulp": "^3.9.1",
     "gulp-jshint": "^2.0.0",
     "gulp-mocha": "^2.2.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-streamify": "^1.0.2",
+    "gulp-uglify": "^1.5.3",
     "jshint": "^2.9.2",
     "jshint-stylish": "^2.2.0",
+    "karma": "^0.13.22",
+    "karma-chrome-launcher": "^1.0.1",
+    "karma-mocha": "^1.0.1",
     "mocha": "^2.4.5",
-    "pouchdb": "^5.3.2"
+    "pouchdb": "^5.3.2",
+    "rimraf": "^2.5.2",
+    "uglify": "^0.1.5",
+    "vinyl-source-stream": "^1.1.0"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/colinskow/pouchdb-seed-design.git"
   },
   "scripts": {
-    "test": "gulp test"
-  },
-  "dependencies": {
-    "deep-equal": "^1.0.1",
-    "node-extend": "^0.2.0",
-    "object-keys-map": "~1.0.1",
-    "object-map": "0.0.0"
+    "test": "gulp test-node"
   },
   "license": "MIT"
 }

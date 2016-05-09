@@ -34,7 +34,7 @@ function docEqual(local, remote) {
   return deepEqual(local, remote, {strict: true});
 }
 
-module.exports = function (db, design, cb) {
+var pouchSeed = module.exports = function (db, design, cb) {
   if (!db || !design) {
     throw new TypeError('`db` and `design` are required');
   }
@@ -84,3 +84,7 @@ module.exports = function (db, design, cb) {
   return seedPromise;
 
 };
+
+if(typeof window === 'object') {
+  window.pouchSeed = pouchSeed;
+}

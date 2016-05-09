@@ -1,0 +1,21 @@
+{
+  "name": "pouchdb-seed-design",
+  "description": "Seed CouchDB's design documents with PouchDB",
+  "version": "0.3.0",
+  "author": "Colin Skow",
+  "license": "MIT",
+  "homepage": "http://github.com/colinskow/pouchdb-seed-design",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/colinskow/pouchdb-seed-design.git"
+  },
+  "main": ["dist/pouchdb-seed-design.js"],
+  "keywords": [
+    "PouchDB",
+    "CouchDB",
+    "seed",
+    "design docs"
+  ],
+  "dependencies": {},
+  "devDependencies": {}
+}
