@@ -4,20 +4,39 @@ if(typeof window === 'undefined') {
   var pouchSeed = require("../index");
 }
 var expect = chai.expect;
+var path = require('path');
+require('dotenv').config({
+  silent: true,
+  path: path.join(__dirname, '../.env')
+});
 
-var db = new PouchDB("http://localhost:5984/pouchdb_seed_test");
+var config = {
+  protocol: process.env.COUCH_PROTOCOL || 'http://',
+  host:     process.env.COUCH_HOST     || 'localhost:5984',
+  user:     process.env.COUCH_USER     || '',
+  password: process.env.COUCH_PASS     || '',
+};
+
+var serverUrlWithAuth = `${config.protocol}${config.user ? `${config.user}:${config.password}@` : ''}${config.host}/pouchdb_seed_test`;
+var db = new PouchDB(serverUrlWithAuth);
 
 var designDoc1 = {
   person: {
     views: {
-      byFirstName: function (doc) {
-        emit(doc.firstName);
+      byFirstName: {
+        map: function (doc) {
+          emit(doc.firstName);
+        }
       },
-      byLastName: function (doc) {
-        emit(doc.lastName);
+      byLastName: {
+        map: function (doc) {
+          emit(doc.lastName);
+        }
       },
-      byFullName: function (doc) {
-        emit(doc.firstName + " " + doc.lastName);
+      byFullName: {
+        map: function (doc) {
+          emit(doc.firstName + " " + doc.lastName);
+        }
       }
     },
     updates: {
@@ -69,7 +88,7 @@ describe("pouchdb_seed_design", function() {
     return db.destroy();
   });
 
-  it("should add design docs to an empty database (returning a promise)", function() {
+  it("should add design docs to an empty database (returning a promise)", function(done) {
     return previous.then(function() {
       return pouchSeed(db, designDoc1);
     })
@@ -82,6 +101,12 @@ describe("pouchdb_seed_design", function() {
         expect(ddoc.lists.zoom).to.be.a('string');
         expect(ddoc.shows.people).to.be.a('string');
         expect(ddoc.validate_doc_update).to.be.a('string');
+      })
+      .then(function () {
+        done();
+      })
+      .catch(function(err) {
+        done(err);
       });
   });
 
@@ -90,7 +115,9 @@ describe("pouchdb_seed_design", function() {
       .then(function() {
         return new Promise(function(resolve, reject) {
           pouchSeed(db, designDoc1, function(err, result) {
-            if(err) reject(err);
+            if(err) {
+              reject(err);
+            }
             expect(err).to.equal(null);
             expect(result).to.equal(false);
             resolve();

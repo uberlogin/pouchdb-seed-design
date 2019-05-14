@@ -30,7 +30,9 @@ function normalizeDoc(doc, id) {
 }
 
 function docEqual(local, remote) {
-  if(!remote) return false;
+  if(!remote) {
+    return false;
+  }
   return deepEqual(local, remote, {strict: true});
 }
 
@@ -53,13 +55,17 @@ var pouchSeed = module.exports = function (db, design, cb) {
         }
       });
 
-      var update = Object.keys(local).filter(function(key) {
-        if(!remote[key]) return true;
-        local[key]._rev = remote[key]._rev;
-        return !docEqual(local[key], remote[key]);
-      }).map(function(key) {
-        return local[key];
-      });
+      var update = Object.keys(local)
+        .filter(function(key) {
+          if(!remote[key]) {
+            return true;
+          }
+          local[key]._rev = remote[key]._rev;
+          return !docEqual(local[key], remote[key]);
+        })
+        .map(function(key) {
+          return local[key];
+        });
 
       if (update.length > 0) {
         return db.bulkDocs({ docs: update });

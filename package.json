@@ -1,6 +1,6 @@
 {
   "name": "pouchdb-seed-design",
-  "version": "0.3.0",
+  "version": "0.7.0",
   "author": "Colin Skow",
   "keywords": [
     "couchdb",
@@ -9,9 +9,18 @@
     "pouchdb",
     "views"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uberlogin/pouchdb-seed-design.git"
+  },
+  "engines": {
+    "node": "10.x.x",
+    "npm": "6.x.x"
+  },
   "description": "Seed CouchDB's design documents with PouchDB",
   "dependencies": {
     "deep-equal": "^1.0.1",
+    "dotenv": "^8.0.0",
     "node-extend": "^0.2.0",
     "object-keys-map": "~1.0.1",
     "object-map": "0.0.0"
@@ -31,14 +40,10 @@
     "karma-chrome-launcher": "^1.0.1",
     "karma-mocha": "^1.0.1",
     "mocha": "^2.4.5",
-    "pouchdb": "^5.3.2",
+    "pouchdb": "^7.0.0",
     "rimraf": "^2.5.2",
     "uglify": "^0.1.5",
     "vinyl-source-stream": "^1.1.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/colinskow/pouchdb-seed-design.git"
   },
   "scripts": {
     "test": "gulp test-node"
